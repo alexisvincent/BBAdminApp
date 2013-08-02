@@ -1,0 +1,7 @@
+/distributables/
+/nbproject/private/
+/build/
+/bundlers/
+/dist/
+.DS_Store
+blueballot.conf
