@@ -21,7 +21,7 @@ public class MainFrame extends AFrame {
 
         //configure this damn FRAME O.o
         this.setResizable(false);
-        this.setSize(500, 400);
+        this.setSize(400, 500);
 
         //begin adding components
         addPaneltoDefaultLayer(homeScreen);

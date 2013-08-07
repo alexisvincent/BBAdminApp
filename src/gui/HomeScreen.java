@@ -106,7 +106,7 @@ public class HomeScreen extends BPanel {
         private GridBagConstraints gc;
         private int panelOpacity;
         private BLabel currentProfileLabel;
-        private BButton editCurrentProfileButton;
+        private BLabel editCurrentProfileButton;
         private AList profileStatsList;
         private StatsListModel statsModel;
 
@@ -117,12 +117,12 @@ public class HomeScreen extends BPanel {
 
             //setup le variabili
             currentProfileLabel = new BLabel(BBAdminApp.getElectionProfile().getName());
-            currentProfileLabel.setPreferredSize(new Dimension(200, 20));
-            editCurrentProfileButton = new BButton("EDIT");
-            editCurrentProfileButton.setPreferredSize(new Dimension(50, 50));
+            currentProfileLabel.setPreferredSize(new Dimension(100, 20));
+            editCurrentProfileButton = new BLabel("EDIT");
+            editCurrentProfileButton.setPreferredSize(new Dimension(40, 20));
             statsModel = new StatsListModel();
             profileStatsList = new AList(statsModel);
-            profileStatsList.setPreferredSize(new Dimension(300, 270));
+            profileStatsList.setPreferredSize(new Dimension(350, 300));
 
             currentProfileLabel.addMouseListener(new MouseAdapter() {
                 @Override
@@ -136,7 +136,7 @@ public class HomeScreen extends BPanel {
             //begin adding le variabili
             this.setLayout(new GridBagLayout());
             gc = new GridBagConstraints();
-            gc.gridx = 1;
+            gc.gridx = 0;
             gc.gridy = 0;
             gc.gridwidth = 1;
             gc.gridheight = 1;
@@ -144,17 +144,18 @@ public class HomeScreen extends BPanel {
             gc.weighty = 0;
             gc.ipadx = 0;
             gc.ipady = 0;
-            gc.insets = new Insets(10, 0, 0, 0);
+            gc.insets = new Insets(0, 0, 0, 0);
             gc.fill = GridBagConstraints.NONE;
-            gc.anchor = GridBagConstraints.SOUTHEAST;
+            gc.anchor = GridBagConstraints.EAST;
             this.add(currentProfileLabel, gc);
 
             gc.gridy++;
             this.add(editCurrentProfileButton, gc);
 
-            gc.gridy = 0;
-            gc.gridx--;
-            gc.gridheight = 2;
+            gc.gridy++;
+            gc.weighty = 1;
+            gc.insets = new Insets(0, 0, 30, 0);
+            gc.fill = GridBagConstraints.VERTICAL;
             this.add(profileStatsList, gc);
 
 
