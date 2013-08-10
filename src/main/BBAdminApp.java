@@ -31,7 +31,12 @@ public class BBAdminApp {
         mainFrame = new MainFrame();
         splashScreen.setVisible(false);
         BMenuBar.setMainFrame(mainFrame);
+        mainFrame.setLocationRelativeTo(null);
         mainFrame.setVisible(true);
+    }
+
+    public static ProfileEngine getProfileEngine() {
+        return profileEngine;
     }
 
     public static ElectionProfile getElectionProfile() {

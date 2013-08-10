@@ -11,11 +11,15 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.ArrayList;
 import main.BBAdminApp;
 import networking.ElectionProfile;
+import networking.Server;
+import toolkit.UIToolkit;
 
 /**
  *
@@ -33,7 +37,7 @@ public class ProfileSelectionOverlay extends AComponent {
     public ProfileSelectionOverlay() {
         model = new ProfileListModel();
         profileList = new AList(model);
-        profileList.setPreferredSize(new Dimension(200, 200));
+        profileList.setPreferredSize(new Dimension(200, 145));
         updateList();
         
         newButton = new BButton("NEW");
@@ -41,6 +45,12 @@ public class ProfileSelectionOverlay extends AComponent {
         newButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
+                ProfileSelectionOverlay.this.setVisible(false);
+                
+                Server server = new Server("Server", "localhost", 44444);
+                ElectionProfile electionProfile = new ElectionProfile("", server, new File("./ThisIsABogusFile/blueballot.conf"));
+                MainFrame.getElectionProfileOverlay().setElectionProfile(electionProfile);
+                MainFrame.getElectionProfileOverlay().setVisible(true);
             }
         });
 
@@ -64,6 +74,7 @@ public class ProfileSelectionOverlay extends AComponent {
         this.add(profileList, gc);
 
         gc.gridy++;
+        gc.insets = new Insets(10, 0, 0, 0);
         this.add(newButton, gc);
     }
 
@@ -77,17 +88,29 @@ public class ProfileSelectionOverlay extends AComponent {
         }
         
         model.setItems(items);
+        model.setSelectedItem(items.get(0));
+    }
+    
+    public void setSelectedProfile(ElectionProfile electionProfile) {
+        
+        for (AListItem item : model.getItems()) {
+            if (item.getDisplayName().equals(electionProfile.getName())) {
+                model.setSelectedItem(item);
+                break;
+            }
+        }
+        
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g;
+        Graphics2D g2d = UIToolkit.getPrettyGraphics(g);
 
-        g2d.setPaint(new Color(34, 34, 34, 200));
+        g2d.setPaint(new Color(34, 34, 34, 150));
         g2d.fillRoundRect(0, 0, this.getWidth(), this.getHeight(), 15, 15);
 
         g2d.setPaint(new Color(34, 34, 34, 255));
-        g2d.fillRoundRect(145, 80, 210, 248, 15, 15);
+        g2d.fillRoundRect(100, 150, 200, 205, 15, 15);
     }
 
     private class ProfileListModel extends AListModel {

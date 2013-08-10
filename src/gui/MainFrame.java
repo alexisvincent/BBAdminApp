@@ -10,6 +10,7 @@ public class MainFrame extends AFrame {
 
     private static HomeScreen homeScreen;
     private static ProfileSelectionOverlay profileSelectionOverlay;
+    private static ElectionProfileOverlay electionProfileOverlay;
 
     public MainFrame() {
         super();
@@ -18,6 +19,9 @@ public class MainFrame extends AFrame {
         homeScreen = new HomeScreen();
         profileSelectionOverlay = new ProfileSelectionOverlay();
         profileSelectionOverlay.setVisible(false);
+        
+        electionProfileOverlay = new ElectionProfileOverlay();
+        electionProfileOverlay.setVisible(false);
 
         //configure this damn FRAME O.o
         this.setResizable(false);
@@ -26,6 +30,7 @@ public class MainFrame extends AFrame {
         //begin adding components
         addPaneltoDefaultLayer(homeScreen);
         addPaneltoPaletteLayer(profileSelectionOverlay);
+        addPaneltoPaletteLayer(electionProfileOverlay);
 
         //starting animation
     }
@@ -36,6 +41,10 @@ public class MainFrame extends AFrame {
 
     public static ProfileSelectionOverlay getProfileSelectionOverlay() {
         return profileSelectionOverlay;
+    }
+
+    public static ElectionProfileOverlay getElectionProfileOverlay() {
+        return electionProfileOverlay;
     }
 
 }

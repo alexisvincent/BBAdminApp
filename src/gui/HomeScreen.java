@@ -1,9 +1,9 @@
 package gui;
 
+import components.AColor;
 import components.AList;
 import components.AListItem;
 import components.AListModel;
-import components.BButton;
 import components.BFooter;
 import components.BLabel;
 import components.BMenuBar;
@@ -17,7 +17,6 @@ import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
-import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -30,6 +29,8 @@ import objects.Candidate;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import toolkit.BToolkit;
+import toolkit.ResourceManager;
+import toolkit.UIToolkit;
 
 /**
  *
@@ -54,13 +55,9 @@ public class HomeScreen extends BPanel {
             Point pt = new Point(200 - (int) (logo.getWidth(null) * logoEnlargement) / 2, 200 - (int) (logo.getHeight(null) * logoEnlargement) / 2);
 
             @Override
-            public void paint(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setComposite(BToolkit.makeComposite(50));
-                g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-                g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+            public void paintComponent(Graphics g) {
+                Graphics2D g2d = UIToolkit.getPrettyGraphics(g);
+                g2d.setComposite(UIToolkit.makeComposite(50));
                 g2d.drawImage(logo, pt.x, pt.y, (int) (logo.getWidth(null) * logoEnlargement), (int) (logo.getHeight(null) * logoEnlargement), this);
             }
         };
@@ -109,6 +106,9 @@ public class HomeScreen extends BPanel {
         private BLabel editCurrentProfileButton;
         private AList profileStatsList;
         private StatsListModel statsModel;
+        
+        private BLabel candidates;
+        private BLabel voters;
 
         public HomeScreenPanel() {
 
@@ -117,12 +117,26 @@ public class HomeScreen extends BPanel {
 
             //setup le variabili
             currentProfileLabel = new BLabel(BBAdminApp.getElectionProfile().getName());
-            currentProfileLabel.setPreferredSize(new Dimension(100, 20));
-            editCurrentProfileButton = new BLabel("EDIT");
+            currentProfileLabel.setPreferredSize(new Dimension(200, 20));
+            currentProfileLabel.setLabelColor(AColor.fancyDarkBlue);
+            currentProfileLabel.setFont(ResourceManager.getFont("Sax Mono").deriveFont(18f));
+
+            editCurrentProfileButton = new BLabel("Edit");
             editCurrentProfileButton.setPreferredSize(new Dimension(40, 20));
+            editCurrentProfileButton.setLabelColor(AColor.WHITE);
+            editCurrentProfileButton.setFont(ResourceManager.getFont("Sax Mono").deriveFont(16f));
+            editCurrentProfileButton.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    MainFrame.getElectionProfileOverlay().setElectionProfile(BBAdminApp.getElectionProfile());
+                    MainFrame.getElectionProfileOverlay().setVisible(true);
+                }
+            });
+
             statsModel = new StatsListModel();
             profileStatsList = new AList(statsModel);
-            profileStatsList.setPreferredSize(new Dimension(350, 300));
+            profileStatsList.setPreferredSize(new Dimension(370, 200));
 
             currentProfileLabel.addMouseListener(new MouseAdapter() {
                 @Override
@@ -130,8 +144,36 @@ public class HomeScreen extends BPanel {
                     MainFrame.getProfileSelectionOverlay().setVisible(true);
                 }
             });
+
+            try {
+                updateList();
+            } catch (Exception e) {
+                System.out.println(e);
+            }
             
-            updateList();
+            candidates = new BLabel("Candidates");
+            candidates.setPreferredSize(new Dimension(100, 20));
+            candidates.setLabelColor(AColor.fancyDarkBlue);
+            candidates.setFont(ResourceManager.getFont("Sax Mono").deriveFont(16f));
+            candidates.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    
+                }
+            });
+            
+            voters = new BLabel("Voters");
+            voters.setPreferredSize(new Dimension(60, 20));
+            voters.setLabelColor(AColor.fancyDarkBlue);
+            voters.setFont(ResourceManager.getFont("Sax Mono").deriveFont(16f));
+            voters.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    
+                }
+            });
 
             //begin adding le variabili
             this.setLayout(new GridBagLayout());
@@ -144,24 +186,38 @@ public class HomeScreen extends BPanel {
             gc.weighty = 0;
             gc.ipadx = 0;
             gc.ipady = 0;
-            gc.insets = new Insets(0, 0, 0, 0);
+            gc.insets = new Insets(20, 15, 0, 8);
             gc.fill = GridBagConstraints.NONE;
             gc.anchor = GridBagConstraints.EAST;
             this.add(currentProfileLabel, gc);
 
-            gc.gridy++;
+            gc.gridx++;
             this.add(editCurrentProfileButton, gc);
 
+            gc.gridx--;
             gc.gridy++;
+            gc.gridwidth = 2;
             gc.weighty = 1;
-            gc.insets = new Insets(0, 0, 30, 0);
-            gc.fill = GridBagConstraints.VERTICAL;
+            gc.insets = new Insets(2, 0, 10, 0);
+            gc.fill = GridBagConstraints.BOTH;
             this.add(profileStatsList, gc);
-
-
+            
+            gc.gridy++;
+            gc.gridwidth = 1;
+            gc.weighty = 0;
+            gc.insets = new Insets(2, 15, 15, 0);
+            gc.fill = GridBagConstraints.NONE;
+            gc.anchor = GridBagConstraints.WEST;
+            this.add(candidates, gc);
+            
+            gc.gridx++;
+            gc.insets = new Insets(2, 0, 15, 15);
+            gc.anchor = GridBagConstraints.EAST;
+            this.add(voters, gc);
         }
 
         public void updateList() {
+
             //getCandidates
             ArrayList<AListItem> items = new ArrayList<>();
             Element rootElement = new Element("Request");
@@ -171,9 +227,15 @@ public class HomeScreen extends BPanel {
             Document document = new Document(rootElement);
             ASocket socket = BBAdminApp.getNetworkingClient().getSocket();
             Request request = new Request(document, socket);
-            Responce responce = socket.postRequest(request);
+            Responce responce = null;
 
-            if (responce.getResponceCode().equals("200")) {
+            try {
+                responce = socket.postRequest(request);
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+
+            if (responce != null && responce.getResponceCode().equals("200")) {
 
                 rootElement = responce.getRootElement();
                 ArrayList<Candidate> candidates = new ArrayList<>();
@@ -185,7 +247,7 @@ public class HomeScreen extends BPanel {
                     String name = candidateElement.getAttributeValue("Name");
                     String info = candidateElement.getAttributeValue("Info");
                     int tally = Integer.parseInt(candidateElement.getAttributeValue("Tally"));
-                    int percentage = Integer.parseInt(candidateElement.getAttributeValue("Percentage"));
+                    double percentage = Double.valueOf(candidateElement.getAttributeValue("Percentage"));
                     Image image = null;
 
                     candidates.add(new Candidate(id, name, info, image, tally, percentage));
@@ -196,22 +258,31 @@ public class HomeScreen extends BPanel {
                 }
 
             } else {
+                items.add(new StatsListItem(new Candidate("", "Server OFFLINE", "", null)) {
+                    @Override
+                    protected void paintComponent(Graphics g) {
+                        Graphics2D g2d = UIToolkit.getPrettyGraphics(g);
+                        g2d.setPaint(AColor.fancyLightBlue);
+                        g2d.fillRoundRect(0, 0, this.getWidth() - 1, this.getHeight() - 1, 12, 12);
+
+                        g2d.setPaint(Color.WHITE);
+                        g2d.setFont(ResourceManager.getFont("Aeriel").deriveFont(13f));
+                        g2d.drawString(getCandidate().getName(), 80, 35);
+                    }
+                });
                 System.out.println("Could not get Candidates from server");
             }
 
             statsModel.setItems(items);
+
             currentProfileLabel.setName(BBAdminApp.getElectionProfile().getName());
         }
 
-        public void animate(String action) {
-            switch (action) {
-            }
-        }
 
         @Override
         protected void paintComponent(Graphics g) {
-            Graphics2D g2d = (Graphics2D) g;
-            g2d.setComposite(BToolkit.makeComposite(panelOpacity));
+            Graphics2D g2d = UIToolkit.getPrettyGraphics(g);
+            g2d.setComposite(UIToolkit.makeComposite(panelOpacity));
         }
 
         private class StatsListModel extends AListModel {
@@ -250,15 +321,23 @@ public class HomeScreen extends BPanel {
 
             @Override
             protected void paintComponent(Graphics g) {
-                Graphics2D g2d = (Graphics2D) g;
+                Graphics2D g2d = UIToolkit.getPrettyGraphics(g);
+                g2d.setPaint(AColor.fancyLightBlue);
+                g2d.fillRoundRect(0, 0, this.getWidth() - 1, this.getHeight() - 1, 12, 12);
 
-                g2d.fillRoundRect(0, 0, this.getWidth(), this.getHeight(), 12, 12);
-                g2d.setPaint(Color.RED);
-                g2d.drawString(getCandidate().getName(), 15, 15);
-                g2d.setPaint(Color.RED);
-                g2d.drawString("Tally: " + getCandidate().getTally(), 15, 30);
-                g2d.setPaint(Color.RED);
-                g2d.drawString(getCandidate().getPercentage() + "%", 100, 30);
+                g2d.setPaint(Color.WHITE);
+                g2d.setFont(ResourceManager.getFont("Aeriel").deriveFont(13f));
+                g2d.drawString(getCandidate().getName(), 15, 20);
+
+                g2d.setFont(ResourceManager.getFont("Sax Mono").deriveFont(14f));
+                g2d.setPaint(Color.WHITE);
+                g2d.drawString("Tally: ", 15, 43);
+                g2d.setFont(ResourceManager.getFont("Aeriel").deriveFont(20f));
+                g2d.drawString("" + getCandidate().getTally(), 70, 45);
+
+                g2d.setFont(ResourceManager.getFont("Sax Mono").deriveFont(20f));
+                g2d.setPaint(Color.WHITE);
+                g2d.drawString(getCandidate().getPercentage() + "%", 130, 45);
             }
         }
     }
