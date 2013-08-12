@@ -17,10 +17,13 @@ import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import javax.swing.JComponent;
+import javax.swing.Timer;
 import main.BBAdminApp;
 import networking.ASocket;
 import networking.Request;
@@ -40,14 +43,15 @@ public class HomeScreen extends BPanel {
     //declare components
 
     private BMenuBar menubar;
-    private HomeScreen.HomeScreenPanel statsScreenPanel;
+    private HomeScreen.HomeScreenPanel homeScreenPanel;
     private BFooter footer;
     private JComponent logoPane;
 
     public HomeScreen() {
         //init components
         menubar = new BMenuBar();
-        statsScreenPanel = new HomeScreen.HomeScreenPanel();
+        homeScreenPanel = new HomeScreen.HomeScreenPanel();
+
         footer = new BFooter();
         logoPane = new JComponent() {
             Image logo = BToolkit.getImage("logo");
@@ -61,8 +65,7 @@ public class HomeScreen extends BPanel {
                 g2d.drawImage(logo, pt.x, pt.y, (int) (logo.getWidth(null) * logoEnlargement), (int) (logo.getHeight(null) * logoEnlargement), this);
             }
         };
-        //set ResultScreen properties
-        //add components to ResultScreen
+
         GridBagConstraints gc = new GridBagConstraints();
         this.setLayout(new GridBagLayout());
 
@@ -78,11 +81,7 @@ public class HomeScreen extends BPanel {
 
         gc.gridy = 1;
         gc.weighty = 1;
-        this.add(statsScreenPanel, gc);
-
-        gc.gridy = 2;
-        gc.weighty = 0;
-        //this.add(footer, gc);
+        this.add(homeScreenPanel, gc);
 
         gc.gridx = 0;
         gc.gridy = 0;
@@ -95,7 +94,7 @@ public class HomeScreen extends BPanel {
     }
 
     public HomeScreen.HomeScreenPanel getHomeScreenPanel() {
-        return statsScreenPanel;
+        return homeScreenPanel;
     }
 
     public class HomeScreenPanel extends JComponent {
@@ -106,7 +105,6 @@ public class HomeScreen extends BPanel {
         private BLabel editCurrentProfileButton;
         private AList profileStatsList;
         private StatsListModel statsModel;
-        
         private BLabel candidates;
         private BLabel voters;
 
@@ -118,15 +116,14 @@ public class HomeScreen extends BPanel {
             //setup le variabili
             currentProfileLabel = new BLabel(BBAdminApp.getElectionProfile().getName());
             currentProfileLabel.setPreferredSize(new Dimension(200, 20));
-            currentProfileLabel.setLabelColor(AColor.fancyDarkBlue);
-            currentProfileLabel.setFont(ResourceManager.getFont("Sax Mono").deriveFont(18f));
+            currentProfileLabel.setLabelColor(AColor.fancyDarkGreen);
+            currentProfileLabel.setFont(ResourceManager.getFont("Aeriel").deriveFont(15f));
 
             editCurrentProfileButton = new BLabel("Edit");
             editCurrentProfileButton.setPreferredSize(new Dimension(40, 20));
             editCurrentProfileButton.setLabelColor(AColor.WHITE);
             editCurrentProfileButton.setFont(ResourceManager.getFont("Sax Mono").deriveFont(16f));
             editCurrentProfileButton.addMouseListener(new MouseAdapter() {
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
                     MainFrame.getElectionProfileOverlay().setElectionProfile(BBAdminApp.getElectionProfile());
@@ -137,6 +134,18 @@ public class HomeScreen extends BPanel {
             statsModel = new StatsListModel();
             profileStatsList = new AList(statsModel);
             profileStatsList.setPreferredSize(new Dimension(370, 200));
+            
+            Timer updater = new Timer(2000, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        updateList();
+                    } catch (Exception ex) {
+                        System.out.println(e);
+                    }
+                }
+            });
+            updater.start();
 
             currentProfileLabel.addMouseListener(new MouseAdapter() {
                 @Override
@@ -145,33 +154,25 @@ public class HomeScreen extends BPanel {
                 }
             });
 
-            try {
-                updateList();
-            } catch (Exception e) {
-                System.out.println(e);
-            }
-            
             candidates = new BLabel("Candidates");
             candidates.setPreferredSize(new Dimension(100, 20));
             candidates.setLabelColor(AColor.fancyDarkBlue);
             candidates.setFont(ResourceManager.getFont("Sax Mono").deriveFont(16f));
             candidates.addMouseListener(new MouseAdapter() {
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    
+                    MainFrame.getCandidateOverlay().setVisible(true);
                 }
             });
-            
+
             voters = new BLabel("Voters");
             voters.setPreferredSize(new Dimension(60, 20));
             voters.setLabelColor(AColor.fancyDarkBlue);
             voters.setFont(ResourceManager.getFont("Sax Mono").deriveFont(16f));
             voters.addMouseListener(new MouseAdapter() {
-
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    
+                    MainFrame.getVoterOverlay().setVisible(true);
                 }
             });
 
@@ -201,7 +202,7 @@ public class HomeScreen extends BPanel {
             gc.insets = new Insets(2, 0, 10, 0);
             gc.fill = GridBagConstraints.BOTH;
             this.add(profileStatsList, gc);
-            
+
             gc.gridy++;
             gc.gridwidth = 1;
             gc.weighty = 0;
@@ -209,7 +210,7 @@ public class HomeScreen extends BPanel {
             gc.fill = GridBagConstraints.NONE;
             gc.anchor = GridBagConstraints.WEST;
             this.add(candidates, gc);
-            
+
             gc.gridx++;
             gc.insets = new Insets(2, 0, 15, 15);
             gc.anchor = GridBagConstraints.EAST;
@@ -232,7 +233,6 @@ public class HomeScreen extends BPanel {
             try {
                 responce = socket.postRequest(request);
             } catch (Exception e) {
-                System.out.println(e);
             }
 
             if (responce != null && responce.getResponceCode().equals("200")) {
@@ -248,7 +248,7 @@ public class HomeScreen extends BPanel {
                     String info = candidateElement.getAttributeValue("Info");
                     int tally = Integer.parseInt(candidateElement.getAttributeValue("Tally"));
                     double percentage = Double.valueOf(candidateElement.getAttributeValue("Percentage"));
-                    Image image = null;
+                    String image = candidateElement.getAttributeValue("Image");
 
                     candidates.add(new Candidate(id, name, info, image, tally, percentage));
                 }
@@ -257,8 +257,23 @@ public class HomeScreen extends BPanel {
                     items.add(new StatsListItem(candidate));
                 }
 
+                if (items.isEmpty()) {
+                    items.add(new StatsListItem(new Candidate("", "No Candidates", "", "")) {
+                        @Override
+                        protected void paintComponent(Graphics g) {
+                            Graphics2D g2d = UIToolkit.getPrettyGraphics(g);
+                            g2d.setPaint(AColor.fancyLightBlue);
+                            g2d.fillRoundRect(0, 0, this.getWidth() - 1, this.getHeight() - 1, 12, 12);
+
+                            g2d.setPaint(Color.WHITE);
+                            g2d.setFont(ResourceManager.getFont("Aeriel").deriveFont(13f));
+                            g2d.drawString(getCandidate().getName(), 93, 35);
+                        }
+                    });
+                }
+
             } else {
-                items.add(new StatsListItem(new Candidate("", "Server OFFLINE", "", null)) {
+                items.add(new StatsListItem(new Candidate("", "Server OFFLINE", "", "")) {
                     @Override
                     protected void paintComponent(Graphics g) {
                         Graphics2D g2d = UIToolkit.getPrettyGraphics(g);
@@ -274,10 +289,10 @@ public class HomeScreen extends BPanel {
             }
 
             statsModel.setItems(items);
+            revalidate();
 
             currentProfileLabel.setName(BBAdminApp.getElectionProfile().getName());
         }
-
 
         @Override
         protected void paintComponent(Graphics g) {

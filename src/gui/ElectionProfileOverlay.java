@@ -1,6 +1,8 @@
 package gui;
 
+import components.AColor;
 import components.AComponent;
+import components.APopup;
 import components.BButton;
 import components.BFormattedTextField;
 import components.BLabel;
@@ -14,7 +16,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.text.ParseException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,6 +24,7 @@ import javax.swing.text.MaskFormatter;
 import main.BBAdminApp;
 import networking.ElectionProfile;
 import networking.Server;
+import toolkit.BToolkit;
 import toolkit.ResourceManager;
 import toolkit.UIToolkit;
 
@@ -88,6 +90,7 @@ public class ElectionProfileOverlay extends AComponent {
             infoLabel = new BLabel("Please complete all fields. :)");
             infoLabel.setPreferredSize(new Dimension(250, 20));
             infoLabel.setFont(ResourceManager.getFont("Sax Mono", 14));
+            infoLabel.setLabelColor(AColor.fancyDarkGreen);
 
             nameLabel = new BLabel("Name");
             nameLabel.setPreferredSize(new Dimension(120, 20));
@@ -132,30 +135,32 @@ public class ElectionProfileOverlay extends AComponent {
             saveButton.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    
-                    Server server = new Server(nameTextField.getText(), serverAddressTextField.getText(), Integer.parseInt(serverPortTextField.getText()));
-                    currentProfile.setName(nameTextField.getText());
-                    currentProfile.setServer(server);
-                    
-                    currentProfile.deleteFile();
-                    currentProfile.setFile(new File("./" + currentProfile.getName() + "/blueballot.conf"));
-                    currentProfile.updateFile();
-                    BBAdminApp.getProfileEngine().updateProfileList();
-                    BBAdminApp.setElectionProfile(currentProfile);
-                    MainFrame.getProfileSelectionOverlay().updateList();
-                    MainFrame.getProfileSelectionOverlay().setSelectedProfile(currentProfile);
-                    MainFrame.getHomeScreen().getHomeScreenPanel().updateList();
-                    MainFrame.getElectionProfileOverlay().setVisible(false);
+                    if (BToolkit.checkComponentCompletion(ElectionProfilePane.this)) {
+                        Server server = new Server(nameTextField.getText(), serverAddressTextField.getText(), Integer.parseInt(serverPortTextField.getText()));
+                        currentProfile.setName(nameTextField.getText());
+                        currentProfile.setServer(server);
+
+                        currentProfile.updateFile();
+                        BBAdminApp.getProfileEngine().updateProfileList();
+                        BBAdminApp.setElectionProfile(currentProfile);
+                        MainFrame.getProfileSelectionOverlay().updateList();
+                        MainFrame.getProfileSelectionOverlay().setSelectedProfile(currentProfile);
+                        MainFrame.getHomeScreen().getHomeScreenPanel().updateList();
+                        MainFrame.getElectionProfileOverlay().setVisible(false);
+                    } else {
+                        new APopup("Please complete all fields");
+                    }
+
                 }
             });
-            
+
             deleteButton = new BButton("DELETE");
             deleteButton.setPreferredSize(new Dimension(100, 30));
             deleteButton.setFont(ResourceManager.getFont("Sax Mono", 14));
             deleteButton.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseReleased(MouseEvent e) {
-                    
+
                     currentProfile.deleteFile();
                     BBAdminApp.getProfileEngine().updateProfileList();
                     BBAdminApp.setElectionProfile(BBAdminApp.getProfileEngine().getFirstProfile());
@@ -213,7 +218,7 @@ public class ElectionProfileOverlay extends AComponent {
             gc.gridy++;
             gc.gridx--;
             this.add(saveButton, gc);
-            
+
             gc.anchor = GridBagConstraints.CENTER;
             gc.gridx++;
             this.add(deleteButton, gc);

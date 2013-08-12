@@ -1,10 +1,12 @@
 package gui;
 
+import components.AColor;
 import components.AComponent;
 import components.AList;
 import components.AListItem;
 import components.AListModel;
 import components.BButton;
+import components.BLabel;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import main.BBAdminApp;
 import networking.ElectionProfile;
 import networking.Server;
+import toolkit.ResourceManager;
 import toolkit.UIToolkit;
 
 /**
@@ -31,6 +34,7 @@ public class ProfileSelectionOverlay extends AComponent {
     private AList profileList;
     private ProfileListModel model;
     
+    private BLabel heading;
     private BButton newButton;
     private GridBagConstraints gc;
 
@@ -39,6 +43,11 @@ public class ProfileSelectionOverlay extends AComponent {
         profileList = new AList(model);
         profileList.setPreferredSize(new Dimension(200, 145));
         updateList();
+        
+        heading = new BLabel("Profile Selection");
+        heading.setPreferredSize(new Dimension(173, 20));
+        heading.setFont(ResourceManager.getFont("Aeriel").deriveFont(13f));
+        heading.setLabelColor(AColor.fancyDarkGreen);
         
         newButton = new BButton("NEW");
         newButton.setPreferredSize(new Dimension(100, 30));
@@ -71,6 +80,9 @@ public class ProfileSelectionOverlay extends AComponent {
         gc.weighty = 0;
         gc.fill = GridBagConstraints.NONE;
         gc.anchor = GridBagConstraints.CENTER;
+        this.add(heading, gc);
+        
+        gc.gridy++;
         this.add(profileList, gc);
 
         gc.gridy++;
@@ -110,7 +122,7 @@ public class ProfileSelectionOverlay extends AComponent {
         g2d.fillRoundRect(0, 0, this.getWidth(), this.getHeight(), 15, 15);
 
         g2d.setPaint(new Color(34, 34, 34, 255));
-        g2d.fillRoundRect(100, 150, 200, 205, 15, 15);
+        g2d.fillRoundRect(100, 140, 200, 220, 15, 15);
     }
 
     private class ProfileListModel extends AListModel {

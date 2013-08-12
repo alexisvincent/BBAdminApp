@@ -11,6 +11,8 @@ public class MainFrame extends AFrame {
     private static HomeScreen homeScreen;
     private static ProfileSelectionOverlay profileSelectionOverlay;
     private static ElectionProfileOverlay electionProfileOverlay;
+    private static CandidateOverlay candidateOverlay;
+    private static VoterOverlay voterOverlay;
 
     public MainFrame() {
         super();
@@ -22,6 +24,12 @@ public class MainFrame extends AFrame {
         
         electionProfileOverlay = new ElectionProfileOverlay();
         electionProfileOverlay.setVisible(false);
+        
+        candidateOverlay = new CandidateOverlay();
+        candidateOverlay.setVisible(false);
+        
+        voterOverlay = new VoterOverlay();
+        voterOverlay.setVisible(false);
 
         //configure this damn FRAME O.o
         this.setResizable(false);
@@ -31,8 +39,9 @@ public class MainFrame extends AFrame {
         addPaneltoDefaultLayer(homeScreen);
         addPaneltoPaletteLayer(profileSelectionOverlay);
         addPaneltoPaletteLayer(electionProfileOverlay);
+        addPaneltoPaletteLayer(candidateOverlay);
+        addPaneltoPaletteLayer(voterOverlay);
 
-        //starting animation
     }
     
     public static HomeScreen getHomeScreen() {
@@ -45,6 +54,14 @@ public class MainFrame extends AFrame {
 
     public static ElectionProfileOverlay getElectionProfileOverlay() {
         return electionProfileOverlay;
+    }
+
+    public static CandidateOverlay getCandidateOverlay() {
+        return candidateOverlay;
+    }
+
+    public static VoterOverlay getVoterOverlay() {
+        return voterOverlay;
     }
 
 }
